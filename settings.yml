@@ -13,6 +13,11 @@ show_pulse_indicator:
   type: "bool"
   description: "Canlı üretim nabız animasyonunu ve imlecini göster"
 
+auto_scroll_to_answer:
+  default: true
+  type: "bool"
+  description: "Soru paylaşıldığında sayfayı doğrudan canlı cevap alanına doğru yumuşakça kaydır"
+
 bot_avatar_url:
   default: "/user_avatar/sorumatik.co/sorumatik_ai/90/235405_2.png"
   type: "string"

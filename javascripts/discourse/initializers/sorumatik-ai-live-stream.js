@@ -14,6 +14,7 @@ export default {
       let isCardMounted = false;
       let currentSourcePostId = null;
       let katexReadyPromise = null;
+      let hasScrolledToCard = false;
 
       // Güvenli yerelleştirme yardımcısı: Eğer çeviri anahtarı bulunamazsa
       // [tr_TR...] gibi ham anahtar yerine doğrudan temiz Türkçe yedeği döndürür.
@@ -151,6 +152,23 @@ export default {
           existingCard.remove();
         }
         isCardMounted = false;
+        hasScrolledToCard = false;
+      }
+
+      function scrollToCard(card) {
+        if (!card || hasScrolledToCard || settings.auto_scroll_to_answer === false) return;
+        hasScrolledToCard = true;
+
+        setTimeout(() => {
+          if (!card || !card.isConnected) return;
+          const headerHeight = document.querySelector(".d-header")?.offsetHeight || 65;
+          const rect = card.getBoundingClientRect();
+          const targetY = window.pageYOffset + rect.top - headerHeight - 15;
+          window.scrollTo({
+            top: Math.max(0, targetY),
+            behavior: "smooth"
+          });
+        }, 220);
       }
 
       function buildFooterHtml() {
@@ -279,6 +297,7 @@ export default {
         }
 
         isCardMounted = true;
+        scrollToCard(card);
         return card;
       }
 
@@ -292,6 +311,7 @@ export default {
           renderThrottleTimer = null;
           const card = ensureCardElement();
           if (!card) return;
+          scrollToCard(card);
 
           const bodyEl = card.querySelector(".sorumatik-ai-live-body");
           if (!bodyEl) return;
