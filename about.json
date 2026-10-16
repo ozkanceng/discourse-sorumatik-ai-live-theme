@@ -1,0 +1,13 @@
+{
+  "name": "Sorumatik AI Canlı Cevap (Web)",
+  "component": true,
+  "authors": "Sorumatik",
+  "license_url": null,
+  "about_url": "https://sorumatik.co",
+  "version": "1.0.0",
+  "minimum_discourse_version": "2.8.0.beta1",
+  "assets": {},
+  "color_schemes": {},
+  "modifiers": {},
+  "learn_more": "https://sorumatik.co"
+}

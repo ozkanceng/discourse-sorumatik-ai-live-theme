@@ -1,0 +1,235 @@
+// Sorumatik AI Canlı Cevap Kartı Stilleri
+
+.sorumatik-ai-live-card {
+  margin: 1.5rem 0 2rem 0;
+  padding: 1.25rem 1.5rem;
+  border-radius: 14px;
+  background: var(--secondary);
+  border: 1px solid var(--primary-low);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  animation: sorumatikCardSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #10b981, #6366f1);
+    background-size: 200% 100%;
+    animation: sorumatikGradientShift 3s ease infinite;
+  }
+
+  &.fading-out {
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+  }
+}
+
+.sorumatik-ai-live-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.85rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--primary-low);
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .bot-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #10b981);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.15rem;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    flex-shrink: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
+
+  .title-group {
+    display: flex;
+    flex-direction: column;
+
+    .card-title {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--primary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: var(--primary-medium);
+      margin-top: 0.15rem;
+    }
+  }
+
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #10b981;
+      display: inline-block;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: sorumatikPulse 1.8s infinite;
+    }
+  }
+}
+
+.sorumatik-ai-live-body {
+  font-size: 0.975rem;
+  line-height: 1.65;
+  color: var(--primary);
+  min-height: 48px;
+
+  p {
+    margin-bottom: 0.75rem;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // KaTeX / MathJax formülleri için taşma ve boşluk ayarı
+  .katex-display, .math-display {
+    margin: 0.85rem 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.25rem 0;
+  }
+
+  .sorumatik-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.15em;
+    vertical-align: text-bottom;
+    background-color: #10b981;
+    margin-left: 2px;
+    animation: sorumatikCursorBlink 0.9s infinite;
+  }
+
+  // İlk token gelmeden önceki yükleme durumu
+  .sorumatik-initial-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--primary-medium);
+    font-style: italic;
+
+    .loading-spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--primary-low);
+      border-top-color: #10b981;
+      border-radius: 50%;
+      animation: sorumatikSpin 0.8s linear infinite;
+    }
+  }
+}
+
+@keyframes sorumatikPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes sorumatikCursorBlink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes sorumatikGradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes sorumatikCardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sorumatikSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 767px) {
+  .sorumatik-ai-live-card {
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .sorumatik-ai-live-header {
+    .title-group .card-title {
+      font-size: 0.92rem;
+    }
+    .live-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+    }
+  }
+}

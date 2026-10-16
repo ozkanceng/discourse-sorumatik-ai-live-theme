@@ -1,0 +1,19 @@
+bot_username:
+  default: "sorumatik_ai"
+  type: "string"
+  description: "Cevabı üreten ve konuya yazan yapay zeka botunun kullanıcı adı"
+
+card_title:
+  default: "Sorumatik AI Çözümü Yazıyor..."
+  type: "string"
+  description: "Canlı cevap kartında görüntülenecek başlık"
+
+show_pulse_indicator:
+  default: true
+  type: "bool"
+  description: "Canlı üretim nabız animasyonunu ve imlecini göster"
+
+bot_avatar_url:
+  default: ""
+  type: "string"
+  description: "Özel bot avatarı URL'si (boş bırakılırsa Discourse kullanıcı avatarı kullanılır)"

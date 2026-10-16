@@ -1,0 +1,7 @@
+tr_TR:
+  sorumatik_ai:
+    title: "Sorumatik AI Çözümü Yazıyor..."
+    generating: "Çözüm adımları canlı hazırlanıyor"
+    persisting: "Çözüm tamamlandı, konuya kaydediliyor..."
+    completed: "Çözüm başarıyla eklendi!"
+    badge: "CANLI YAPAY ZEKA"

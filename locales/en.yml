@@ -1,0 +1,7 @@
+en:
+  sorumatik_ai:
+    title: "Sorumatik AI is Solving..."
+    generating: "Generating solution live"
+    persisting: "Solution ready, saving to topic..."
+    completed: "Solution posted successfully!"
+    badge: "LIVE AI SOLVER"
