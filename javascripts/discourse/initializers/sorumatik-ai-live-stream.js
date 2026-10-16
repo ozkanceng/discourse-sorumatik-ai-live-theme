@@ -108,8 +108,12 @@ export default {
         // Kartı sorunun hemen altına (Post #1 veya ilgili kaynak post) yerleştir
         const postElement =
           document.querySelector(`#post_${sourcePostNumber}`) ||
+          document.querySelector(`[data-post-number="${sourcePostNumber}"]`) ||
+          document.querySelector(`.topic-post[data-post-id="${currentSourcePostId}"]`) ||
           document.querySelector(".topic-post:first-child") ||
-          document.querySelector(".post-stream");
+          document.querySelector(".post-stream") ||
+          document.querySelector("#topic-posts") ||
+          document.querySelector(".topic-area");
 
         if (!postElement) return null;
 
@@ -148,10 +152,21 @@ export default {
           ${buildFooterHtml()}
         `;
 
-        if (postElement.classList.contains("post-stream")) {
-          postElement.prepend(card);
-        } else if (postElement.parentNode) {
-          postElement.parentNode.insertBefore(card, postElement.nextSibling);
+        if (postElement.id === `post_${sourcePostNumber}` || postElement.classList.contains("topic-post")) {
+          if (postElement.nextSibling) {
+            postElement.parentNode.insertBefore(card, postElement.nextSibling);
+          } else {
+            postElement.parentNode.appendChild(card);
+          }
+        } else if (postElement.classList.contains("post-stream") || postElement.id === "topic-posts") {
+          const firstArticle = postElement.querySelector(".topic-post") || postElement.firstElementChild;
+          if (firstArticle && firstArticle.nextSibling) {
+            postElement.insertBefore(card, firstArticle.nextSibling);
+          } else {
+            postElement.prepend(card);
+          }
+        } else {
+          postElement.appendChild(card);
         }
 
         isCardMounted = true;
@@ -223,7 +238,6 @@ export default {
 
       function attachToGeneration(topic, sourcePostId, sourcePostNumber = 1) {
         if (!sourcePostId || sourcePostId <= 0) return;
-        currentSourcePostId = sourcePostId;
 
         const channel = `/sorumatik/ai-answer/${sourcePostId}`;
         if (activeChannel === channel) return;
@@ -232,16 +246,38 @@ export default {
         activeChannel = channel;
         currentSourcePostId = sourcePostId;
 
+        // Kartı ilk postun altına yerleştirmeyi dene
         ensureCardElement(sourcePostNumber);
 
-        // Sunucuda zaten üretilmiş kısım varsa hemen çekip ekrana koy
+        // Sunucuda devam eden veya üretilmiş bir durum var mı kontrol et
         ajax(`/sorumatik/ai-generations/by-source/${sourcePostId}`, { ignoreUncaught: true })
           .then((res) => {
-            if (res && res.raw) {
+            if (activeChannel !== channel || !res) return;
+
+            if (res.state === "completed" && res.post_id) {
+              const posts = topic.get("postStream.posts") || [];
+              const hasBot = posts.some(
+                (p) => (p.get ? p.get("username") : p.username)?.toLowerCase() === botUsername
+              );
+              if (hasBot) {
+                cleanupCurrentSession();
+                return;
+              }
+            }
+
+            if (res.state === "failed") {
+              cleanupCurrentSession();
+              return;
+            }
+
+            if (res.raw) {
+              ensureCardElement(sourcePostNumber);
               renderLiveText(res.raw, res.done === true || res.state === "completed");
               if (res.done === true || res.state === "completed") {
                 handleComplete(topic.get("postStream"));
               }
+            } else if (res.state === "queued" || res.state === "generating" || res.state === "persisting") {
+              ensureCardElement(sourcePostNumber);
             }
           })
           .catch(() => {});
@@ -249,7 +285,9 @@ export default {
         // MessageBus canlı yayınını dinle
         if (messageBus) {
           messageBus.subscribe(channel, (data) => {
-            if (!data) return;
+            if (activeChannel !== channel || !data) return;
+
+            ensureCardElement(sourcePostNumber);
 
             if (data.raw) {
               renderLiveText(data.raw, data.done === true || data.state === "completed");
@@ -267,17 +305,20 @@ export default {
         }
       }
 
-      api.onPageChange((url) => {
-        // Topic sayfası kontrolü: /t/:slug/:id
-        if (!url || !url.includes("/t/")) {
-          cleanupCurrentSession();
-          return;
+      let pageChangeCheckTimer = null;
+
+      function inspectTopicAndAttach(retries = 20) {
+        if (pageChangeCheckTimer) {
+          clearTimeout(pageChangeCheckTimer);
+          pageChangeCheckTimer = null;
         }
 
         const topicController = api.container.lookup("controller:topic");
         const topic = topicController?.get("model");
         if (!topic) {
-          cleanupCurrentSession();
+          if (retries > 0) {
+            pageChangeCheckTimer = setTimeout(() => inspectTopicAndAttach(retries - 1), 100);
+          }
           return;
         }
 
@@ -288,22 +329,43 @@ export default {
         const hasExistingBotReply = posts.some(
           (p) => (p.get ? p.get("username") : p.username)?.toLowerCase() === botUsername
         );
-
-        const pending = topic.get("sorumatik_pending_generation");
-
-        if (pending && pending.source_post_id) {
-          // Sunucuda devam eden bir üretim var!
-          attachToGeneration(topic, pending.source_post_id, 1);
-        } else if (!hasExistingBotReply && posts.length > 0) {
-          // Henüz bot cevabı yok, soru konusu ise MessageBus'ı dinle
-          const firstPost = posts[0];
-          const firstPostId = firstPost.get ? firstPost.get("id") : firstPost.id;
-          if (firstPostId) {
-            attachToGeneration(topic, firstPostId, 1);
-          }
-        } else {
+        if (hasExistingBotReply) {
           cleanupCurrentSession();
+          return;
         }
+
+        // İlk post ID'sini güvenilir kaynaklardan al
+        const pending = topic.get("sorumatik_pending_generation");
+        const firstPostId =
+          pending?.source_post_id ||
+          topic.get("first_post_id") ||
+          postStream?.get("firstPostId") ||
+          postStream?.get("stream.firstObject") ||
+          postStream?.stream?.[0] ||
+          (posts.length > 0 ? (posts[0].get ? posts[0].get("id") : posts[0].id) : null);
+
+        if (!firstPostId) {
+          if (retries > 0) {
+            pageChangeCheckTimer = setTimeout(() => inspectTopicAndAttach(retries - 1), 150);
+          }
+          return;
+        }
+
+        attachToGeneration(topic, firstPostId, 1);
+      }
+
+      api.onPageChange((url) => {
+        // Topic sayfası kontrolü: /t/:slug/:id
+        if (!url || !url.includes("/t/")) {
+          if (pageChangeCheckTimer) {
+            clearTimeout(pageChangeCheckTimer);
+            pageChangeCheckTimer = null;
+          }
+          cleanupCurrentSession();
+          return;
+        }
+
+        inspectTopicAndAttach(20);
       });
     });
   }
