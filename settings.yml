@@ -18,6 +18,11 @@ auto_scroll_to_answer:
   type: "bool"
   description: "Soru paylaşıldığında sayfayı doğrudan canlı cevap alanına doğru yumuşakça kaydır"
 
+auto_scroll_follow_stream:
+  default: true
+  type: "bool"
+  description: "Cevap uzadıkça sayfayı otomatik olarak aşağı kaydırarak son yazılan satırı takip et"
+
 bot_avatar_url:
   default: "/user_avatar/sorumatik.co/sorumatik_ai/90/235405_2.png"
   type: "string"

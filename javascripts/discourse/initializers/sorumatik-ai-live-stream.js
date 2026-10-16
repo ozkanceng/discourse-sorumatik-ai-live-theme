@@ -15,6 +15,11 @@ export default {
       let currentSourcePostId = null;
       let katexReadyPromise = null;
       let hasScrolledToCard = false;
+      let isUserScrolledUp = false;
+      let lastScrollY = window.pageYOffset;
+      let scrollListenersAttached = false;
+      let touchStartY = 0;
+      let autoScrollThrottleTimer = null;
 
       // Güvenli yerelleştirme yardımcısı: Eğer çeviri anahtarı bulunamazsa
       // [tr_TR...] gibi ham anahtar yerine doğrudan temiz Türkçe yedeği döndürür.
@@ -153,6 +158,68 @@ export default {
         }
         isCardMounted = false;
         hasScrolledToCard = false;
+        detachScrollListeners();
+      }
+
+      function handleUserScroll() {
+        const currentY = window.pageYOffset;
+        if (currentY < lastScrollY - 15) {
+          isUserScrolledUp = true;
+        } else {
+          const viewportBottom = currentY + window.innerHeight;
+          const docHeight = document.documentElement.scrollHeight;
+          if (docHeight - viewportBottom < 120) {
+            isUserScrolledUp = false;
+          }
+        }
+        lastScrollY = currentY;
+      }
+
+      function handleWheel(e) {
+        if (e.deltaY < -5) {
+          isUserScrolledUp = true;
+        } else if (e.deltaY > 5) {
+          const viewportBottom = window.pageYOffset + window.innerHeight;
+          const docHeight = document.documentElement.scrollHeight;
+          if (docHeight - viewportBottom < 120) {
+            isUserScrolledUp = false;
+          }
+        }
+      }
+
+      function handleTouchStart(e) {
+        if (e.touches && e.touches[0]) {
+          touchStartY = e.touches[0].clientY;
+        }
+      }
+
+      function handleTouchMove(e) {
+        if (e.touches && e.touches[0]) {
+          const currentY = e.touches[0].clientY;
+          if (currentY > touchStartY + 15) {
+            isUserScrolledUp = true;
+          }
+        }
+      }
+
+      function attachScrollListeners() {
+        if (scrollListenersAttached) return;
+        scrollListenersAttached = true;
+        lastScrollY = window.pageYOffset;
+        window.addEventListener("scroll", handleUserScroll, { passive: true });
+        window.addEventListener("wheel", handleWheel, { passive: true });
+        window.addEventListener("touchstart", handleTouchStart, { passive: true });
+        window.addEventListener("touchmove", handleTouchMove, { passive: true });
+      }
+
+      function detachScrollListeners() {
+        if (!scrollListenersAttached) return;
+        scrollListenersAttached = false;
+        window.removeEventListener("scroll", handleUserScroll, { passive: true });
+        window.removeEventListener("wheel", handleWheel, { passive: true });
+        window.removeEventListener("touchstart", handleTouchStart, { passive: true });
+        window.removeEventListener("touchmove", handleTouchMove, { passive: true });
+        isUserScrolledUp = false;
       }
 
       function scrollToCard(card) {
@@ -169,6 +236,29 @@ export default {
             behavior: "smooth"
           });
         }, 220);
+      }
+
+      function autoScrollFollow(card) {
+        if (!card || isUserScrolledUp || settings.auto_scroll_follow_stream === false) return;
+
+        if (autoScrollThrottleTimer) return;
+        autoScrollThrottleTimer = setTimeout(() => {
+          autoScrollThrottleTimer = null;
+          if (!card || !card.isConnected || isUserScrolledUp) return;
+
+          const cursor = card.querySelector(".sorumatik-cursor");
+          const targetEl = cursor || card;
+          const rect = targetEl.getBoundingClientRect();
+          const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+
+          if (rect.bottom > viewportHeight - 85) {
+            const scrollDelta = rect.bottom - (viewportHeight - 85);
+            window.scrollBy({
+              top: scrollDelta,
+              behavior: "smooth"
+            });
+          }
+        }, 80);
       }
 
       function buildFooterHtml() {
@@ -297,6 +387,7 @@ export default {
         }
 
         isCardMounted = true;
+        attachScrollListeners();
         scrollToCard(card);
         return card;
       }
@@ -324,6 +415,11 @@ export default {
             // Formülleri anında KaTeX ile render et
             await ensureKaTeX();
             renderMathInContainer(bodyEl);
+
+            // Canlı yazma sırasında imleci ve yeni satırları takip et
+            if (!done) {
+              autoScrollFollow(card);
+            }
           } catch (_) {
             bodyEl.textContent = currentRaw;
           }
@@ -331,6 +427,7 @@ export default {
       }
 
       function handleComplete(postStream) {
+        detachScrollListeners();
         const card = document.querySelector(".sorumatik-ai-live-card");
         if (card) {
           const statusText = card.querySelector(".status-text");
