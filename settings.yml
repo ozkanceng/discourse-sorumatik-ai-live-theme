@@ -14,9 +14,9 @@ show_pulse_indicator:
   description: "Canlı üretim nabız animasyonunu ve imlecini göster"
 
 bot_avatar_url:
-  default: ""
+  default: "/user_avatar/sorumatik.co/sorumatik_ai/90/235405_2.png"
   type: "string"
-  description: "Özel bot avatarı URL'si (boş bırakılırsa robot ikonu kullanılır)"
+  description: "Özel bot avatarı URL'si (varsayılan: sorumatik_ai resmi avatarı)"
 
 show_branding:
   default: true

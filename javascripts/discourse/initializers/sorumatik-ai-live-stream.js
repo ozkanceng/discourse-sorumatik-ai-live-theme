@@ -13,13 +13,124 @@ export default {
       let currentRaw = "";
       let isCardMounted = false;
       let currentSourcePostId = null;
+      let katexReadyPromise = null;
+
+      // Güvenli yerelleştirme yardımcısı: Eğer çeviri anahtarı bulunamazsa
+      // [tr_TR...] gibi ham anahtar yerine doğrudan temiz Türkçe yedeği döndürür.
+      function t(key, fallback) {
+        let val = null;
+        try {
+          if (typeof themePrefix === "function") {
+            val = I18n.t(themePrefix(key));
+          }
+        } catch (_) {}
+
+        if (!val || (typeof val === "string" && val.startsWith("[") && val.endsWith("]"))) {
+          try {
+            val = I18n.t(key);
+          } catch (_) {}
+        }
+
+        if (!val || (typeof val === "string" && val.startsWith("[") && val.endsWith("]"))) {
+          return fallback;
+        }
+        return val;
+      }
 
       const botUsername = (settings.bot_username || "sorumatik_ai").toLowerCase();
-      const cardTitle = settings.card_title || I18n.t("sorumatik_ai.title") || "Sorumatik AI Çözümü Yazıyor...";
+      const cardTitle = settings.card_title || t("sorumatik_ai.title", "Sorumatik AI Çözümü Yazıyor...");
       const showPulse = settings.show_pulse_indicator !== false;
-      const customAvatar = (settings.bot_avatar_url || "").trim();
+
+      // sorumatik_ai resmi bot profil avatarı
+      const defaultBotAvatar = `/user_avatar/sorumatik.co/${botUsername}/90/235405_2.png`;
+      const botAvatarUrl = (settings.bot_avatar_url || "").trim() || defaultBotAvatar;
 
       const messageBus = api.container.lookup("service:message-bus") || window.MessageBus;
+
+      // KaTeX kütüphanesini ve CSS stilini garantiye al
+      function ensureKaTeX() {
+        if (window.katex && typeof window.katex.render === "function") {
+          return Promise.resolve(window.katex);
+        }
+        if (katexReadyPromise) return katexReadyPromise;
+
+        katexReadyPromise = new Promise((resolve) => {
+          if (!document.querySelector("#sorumatik-katex-css") && !document.querySelector("link[href*='katex']")) {
+            const link = document.createElement("link");
+            link.id = "sorumatik-katex-css";
+            link.rel = "stylesheet";
+            link.href = "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css";
+            document.head.appendChild(link);
+          }
+
+          if (window.katex && typeof window.katex.render === "function") {
+            resolve(window.katex);
+            return;
+          }
+
+          if (!document.querySelector("#sorumatik-katex-js") && !document.querySelector("script[src*='katex']")) {
+            const script = document.createElement("script");
+            script.id = "sorumatik-katex-js";
+            script.src = "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js";
+            script.async = true;
+            script.onload = () => resolve(window.katex);
+            script.onerror = () => resolve(null);
+            document.head.appendChild(script);
+          } else {
+            const checkTimer = setInterval(() => {
+              if (window.katex && typeof window.katex.render === "function") {
+                clearInterval(checkTimer);
+                resolve(window.katex);
+              }
+            }, 50);
+            setTimeout(() => {
+              clearInterval(checkTimer);
+              resolve(window.katex || null);
+            }, 2500);
+          }
+        });
+
+        return katexReadyPromise;
+      }
+
+      // Canlı yazılan metin içindeki LaTeX matematik formüllerini KaTeX ile biçimlendir
+      function renderMathInContainer(container) {
+        if (!container || !window.katex || typeof window.katex.render !== "function") return;
+
+        // 1. Discourse Markdown'ın oluşturduğu .math etiketlerini biçimlendir
+        const mathElements = container.querySelectorAll(".math");
+        mathElements.forEach((el) => {
+          const isDisplay = el.tagName === "DIV" || el.classList.contains("math-block");
+          let tex = el.getAttribute("data-original-tex");
+          if (!tex) {
+            tex = el.textContent || "";
+            el.setAttribute("data-original-tex", tex);
+          }
+          if (!tex.trim()) return;
+
+          try {
+            window.katex.render(tex, el, {
+              displayMode: isDisplay,
+              throwOnError: false
+            });
+          } catch (_) {}
+        });
+
+        // 2. Eğer sayfada renderMathInElement (auto-render) varsa ham $...$ ve $$...$$ ifadelerini de yakala
+        if (typeof window.renderMathInElement === "function") {
+          try {
+            window.renderMathInElement(container, {
+              delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\[", right: "\\]", display: true },
+                { left: "\\(", right: "\\)", display: false }
+              ],
+              throwOnError: false
+            });
+          } catch (_) {}
+        }
+      }
 
       function cleanupCurrentSession() {
         if (renderThrottleTimer) {
@@ -45,7 +156,7 @@ export default {
       function buildFooterHtml() {
         const showBranding = settings.show_branding !== false;
         const brandingUrl = settings.branding_url || "https://sorumatik.co";
-        const brandingText = settings.branding_text || I18n.t("sorumatik_ai.branding") || "sorumatik.co Yapay Zeka Motoru";
+        const brandingText = settings.branding_text || t("sorumatik_ai.branding", "sorumatik.co Yapay Zeka Motoru");
 
         const showApp = settings.show_app_download !== false;
         const useDirect = settings.use_direct_store_links === true;
@@ -72,12 +183,12 @@ export default {
           if (useDirect) {
             rightHtml = `
               <div class="footer-right">
-                <span class="app-hint">${I18n.t("sorumatik_ai.download_app_hint") || "Mobilde çözdür & dinle:"}</span>
+                <span class="app-hint">${t("sorumatik_ai.download_app_hint", "Mobilde kesintisiz & sesli soru çözümü için:")}</span>
                 <a href="${androidUrl}" target="_blank" rel="noopener noreferrer" class="app-download-btn android-btn">
-                  ${I18n.t("sorumatik_ai.download_android") || "🤖 Android"}
+                  ${t("sorumatik_ai.download_android", "🤖 Android İndir")}
                 </a>
                 <a href="${iosUrl}" target="_blank" rel="noopener noreferrer" class="app-download-btn ios-btn">
-                  ${I18n.t("sorumatik_ai.download_ios") || "🍎 iOS"}
+                  ${t("sorumatik_ai.download_ios", "🍎 iOS İndir")}
                 </a>
               </div>
             `;
@@ -85,7 +196,7 @@ export default {
             rightHtml = `
               <div class="footer-right">
                 <a href="${appLandingUrl}" target="_blank" rel="noopener noreferrer" class="app-download-btn" title="Sorumatik Mobil Uygulamasını İndir">
-                  ${I18n.t("sorumatik_ai.download_app_button") || "📱 Sorumatik Uygulamasını İndir"}
+                  ${t("sorumatik_ai.download_app_button", "📱 Sorumatik Uygulamasını İndir")}
                 </a>
               </div>
             `;
@@ -121,14 +232,12 @@ export default {
         card.className = "sorumatik-ai-live-card";
         card.id = `sorumatik-live-card-${currentSourcePostId || "active"}`;
 
-        const avatarHtml = customAvatar
-          ? `<img src="${customAvatar}" alt="${botUsername}" />`
-          : `🤖`;
+        const avatarHtml = `<img src="${botAvatarUrl}" alt="${botUsername}" class="sorumatik-bot-avatar-img" onerror="this.onerror=null;this.src='/uploads/default/original/2X/b/bfa9260de78d71e38ac0b7ec2e03a8e53e4ddcfb_2_32x32.png';" />`;
 
         const badgeHtml = showPulse
           ? `<div class="live-badge">
               <span class="pulse-dot"></span>
-              <span>${I18n.t("sorumatik_ai.badge") || "CANLI"}</span>
+              <span>${t("sorumatik_ai.badge", "CANLI")}</span>
             </div>`
           : "";
 
@@ -138,7 +247,7 @@ export default {
               <div class="bot-avatar">${avatarHtml}</div>
               <div class="title-group">
                 <h4 class="card-title">${cardTitle}</h4>
-                <span class="card-subtitle status-text">${I18n.t("sorumatik_ai.generating") || "Çözüm adımları canlı hazırlanıyor..."}</span>
+                <span class="card-subtitle status-text">${t("sorumatik_ai.generating", "Çözüm adımları canlı hazırlanıyor...")}</span>
               </div>
             </div>
             ${badgeHtml}
@@ -146,7 +255,7 @@ export default {
           <div class="sorumatik-ai-live-body">
             <div class="sorumatik-initial-loading">
               <div class="loading-spinner"></div>
-              <span>${I18n.t("sorumatik_ai.generating") || "Çözüm adımları canlı hazırlanıyor..."}</span>
+              <span>${t("sorumatik_ai.generating", "Çözüm adımları canlı hazırlanıyor...")}</span>
             </div>
           </div>
           ${buildFooterHtml()}
@@ -192,24 +301,13 @@ export default {
             const cursorHtml = done ? "" : `<span class="sorumatik-cursor"></span>`;
             bodyEl.innerHTML = cookedHtml + cursorHtml;
 
-            // KaTeX formülleri sayfada yüklüyse anında matematik formatla
-            if (window.renderMathInElement) {
-              try {
-                window.renderMathInElement(bodyEl, {
-                  delimiters: [
-                    { left: "$$", right: "$$", display: true },
-                    { left: "$", right: "$", display: false },
-                    { left: "\\[", right: "\\]", display: true },
-                    { left: "\\(", right: "\\)", display: false }
-                  ],
-                  throwOnError: false
-                });
-              } catch (_) {}
-            }
+            // Formülleri anında KaTeX ile render et
+            await ensureKaTeX();
+            renderMathInContainer(bodyEl);
           } catch (_) {
             bodyEl.textContent = currentRaw;
           }
-        }, 60);
+        }, 50);
       }
 
       function handleComplete(postStream) {
@@ -217,7 +315,7 @@ export default {
         if (card) {
           const statusText = card.querySelector(".status-text");
           if (statusText) {
-            statusText.textContent = I18n.t("sorumatik_ai.completed") || "Çözüm eklendi!";
+            statusText.textContent = t("sorumatik_ai.completed", "Çözüm eklendi!");
           }
           const cursor = card.querySelector(".sorumatik-cursor");
           if (cursor) cursor.remove();

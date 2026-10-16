@@ -1,10 +1,12 @@
 tr_TR:
+  theme_metadata:
+    description: "Sorumatik AI Canlı Cevap ve Mobil Uygulama Tanıtım Bileşeni"
   sorumatik_ai:
     title: "Sorumatik AI Çözümü Yazıyor..."
-    generating: "Çözüm adımları canlı hazırlanıyor"
+    generating: "Çözüm adımları canlı hazırlanıyor..."
     persisting: "Çözüm tamamlandı, konuya kaydediliyor..."
     completed: "Çözüm başarıyla eklendi!"
-    badge: "CANLI YAPAY ZEKA"
+    badge: "CANLI"
     branding: "sorumatik.co Yapay Zeka Motoru"
     download_app_button: "📱 Sorumatik Uygulamasını İndir"
     download_app_hint: "Mobilde kesintisiz & sesli soru çözümü için"

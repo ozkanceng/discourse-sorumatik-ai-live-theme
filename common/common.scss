@@ -46,23 +46,24 @@
   }
 
   .bot-avatar {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #10b981);
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
-    font-size: 1.15rem;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    overflow: hidden;
     flex-shrink: 0;
+    border: 2px solid #10b981;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
 
     img {
       width: 100%;
       height: 100%;
       border-radius: 50%;
       object-fit: cover;
+      display: block;
     }
   }
 
@@ -126,11 +127,27 @@
     }
   }
 
+  .katex {
+    font-size: 1.08em;
+    color: var(--primary);
+  }
+
   .katex-display, .math-display {
     margin: 0.85rem 0;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 0.25rem 0;
+    padding: 0.35rem 0;
+    text-align: center;
+  }
+
+  .math {
+    color: var(--primary);
+    &.block-math, &.math-block {
+      display: block;
+      margin: 0.85rem 0;
+      text-align: center;
+      overflow-x: auto;
+    }
   }
 
   .sorumatik-cursor {
