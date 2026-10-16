@@ -1,13 +1,13 @@
 {
-  "name": "Sorumatik AI Canlı Cevap (Web)",
+  "name": "Sorumatik AI Canlı Cevap & Mobil Uygulama",
   "component": true,
-  "authors": "Sorumatik",
+  "authors": "Sorumatik Ekibi (sorumatik.co)",
   "license_url": null,
   "about_url": "https://sorumatik.co",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "minimum_discourse_version": "2.8.0.beta1",
   "assets": {},
   "color_schemes": {},
   "modifiers": {},
-  "learn_more": "https://sorumatik.co"
+  "learn_more": "https://sorumatik.co/t/app"
 }

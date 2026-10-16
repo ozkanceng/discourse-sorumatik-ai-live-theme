@@ -5,3 +5,8 @@ en:
     persisting: "Solution ready, saving to topic..."
     completed: "Solution posted successfully!"
     badge: "LIVE AI SOLVER"
+    branding: "sorumatik.co AI Engine"
+    download_app_button: "📱 Get Sorumatik App"
+    download_app_hint: "For uninterrupted & audio solutions on mobile"
+    download_android: "🤖 Android"
+    download_ios: "🍎 iOS"

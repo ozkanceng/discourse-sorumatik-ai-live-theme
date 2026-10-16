@@ -16,4 +16,44 @@ show_pulse_indicator:
 bot_avatar_url:
   default: ""
   type: "string"
-  description: "Özel bot avatarı URL'si (boş bırakılırsa Discourse kullanıcı avatarı kullanılır)"
+  description: "Özel bot avatarı URL'si (boş bırakılırsa robot ikonu kullanılır)"
+
+show_branding:
+  default: true
+  type: "bool"
+  description: "Kart altında sorumatik.co marka etiketini göster"
+
+branding_url:
+  default: "https://sorumatik.co"
+  type: "string"
+  description: "Marka etiketine tıklandığında gidilecek URL"
+
+branding_text:
+  default: "sorumatik.co Yapay Zeka Motoru"
+  type: "string"
+  description: "Kart altında görünecek marka metni"
+
+show_app_download:
+  default: true
+  type: "bool"
+  description: "Kart altında mobil uygulama indirme butonunu/rozetini göster"
+
+app_landing_url:
+  default: "https://sorumatik.co/t/app"
+  type: "string"
+  description: "Mobil uygulama indirme yönlendirme sayfası (sorumatik.co/t/app)"
+
+use_direct_store_links:
+  default: false
+  type: "bool"
+  description: "Yönlendirme sayfası yerine doğrudan App Store / Play Store butonlarını ayrı ayrı göster"
+
+android_store_url:
+  default: "https://play.google.com/store/apps/details?id=com.sorumatik"
+  type: "string"
+  description: "Google Play Store indirme bağlantısı"
+
+ios_store_url:
+  default: "https://apps.apple.com/app/sorumatik/id6474668271"
+  type: "string"
+  description: "Apple App Store indirme bağlantısı"

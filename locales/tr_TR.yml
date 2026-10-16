@@ -5,3 +5,8 @@ tr_TR:
     persisting: "Çözüm tamamlandı, konuya kaydediliyor..."
     completed: "Çözüm başarıyla eklendi!"
     badge: "CANLI YAPAY ZEKA"
+    branding: "sorumatik.co Yapay Zeka Motoru"
+    download_app_button: "📱 Sorumatik Uygulamasını İndir"
+    download_app_hint: "Mobilde kesintisiz & sesli soru çözümü için"
+    download_android: "🤖 Android İndir"
+    download_ios: "🍎 iOS İndir"

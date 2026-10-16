@@ -1,8 +1,8 @@
-// Sorumatik AI Canlı Cevap Kartı Stilleri
+// Sorumatik AI Canlı Cevap Kartı ve Mobil Uygulama Tanıtım Stilleri
 
 .sorumatik-ai-live-card {
   margin: 1.5rem 0 2rem 0;
-  padding: 1.25rem 1.5rem;
+  padding: 1.25rem 1.5rem 1rem 1.5rem;
   border-radius: 14px;
   background: var(--secondary);
   border: 1px solid var(--primary-low);
@@ -126,7 +126,6 @@
     }
   }
 
-  // KaTeX / MathJax formülleri için taşma ve boşluk ayarı
   .katex-display, .math-display {
     margin: 0.85rem 0;
     overflow-x: auto;
@@ -144,7 +143,6 @@
     animation: sorumatikCursorBlink 0.9s infinite;
   }
 
-  // İlk token gelmeden önceki yükleme durumu
   .sorumatik-initial-loading {
     display: flex;
     align-items: center;
@@ -159,6 +157,82 @@
       border-top-color: #10b981;
       border-radius: 50%;
       animation: sorumatikSpin 0.8s linear infinite;
+    }
+  }
+}
+
+.sorumatik-ai-live-footer {
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--primary-low);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.82rem;
+
+  .footer-left {
+    display: flex;
+    align-items: center;
+
+    .branding-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--primary-medium);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #3b82f6;
+      }
+
+      .lightning-icon {
+        color: #f59e0b;
+        font-size: 0.95rem;
+      }
+
+      strong {
+        color: var(--primary);
+        font-weight: 600;
+      }
+    }
+  }
+
+  .footer-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    .app-hint {
+      color: var(--primary-medium);
+      font-size: 0.78rem;
+    }
+
+    .app-download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-decoration: none;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+      color: #3b82f6;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: linear-gradient(135deg, #3b82f6, #10b981);
+        color: #ffffff;
+        border-color: transparent;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(59, 130, 246, 0.25);
+      }
     }
   }
 }
@@ -230,6 +304,17 @@
     .live-badge {
       font-size: 0.7rem;
       padding: 0.2rem 0.5rem;
+    }
+  }
+
+  .sorumatik-ai-live-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+
+    .footer-right {
+      width: 100%;
+      justify-content: flex-start;
     }
   }
 }

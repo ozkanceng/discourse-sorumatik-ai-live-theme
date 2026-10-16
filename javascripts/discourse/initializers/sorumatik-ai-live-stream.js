@@ -9,7 +9,6 @@ export default {
   initialize() {
     withPluginApi("0.8.14", (api) => {
       let activeChannel = null;
-      let activeSubscription = null;
       let renderThrottleTimer = null;
       let currentRaw = "";
       let isCardMounted = false;
@@ -33,7 +32,6 @@ export default {
           } catch (_) {}
           activeChannel = null;
         }
-        activeSubscription = null;
         currentRaw = "";
         currentSourcePostId = null;
 
@@ -44,12 +42,70 @@ export default {
         isCardMounted = false;
       }
 
+      function buildFooterHtml() {
+        const showBranding = settings.show_branding !== false;
+        const brandingUrl = settings.branding_url || "https://sorumatik.co";
+        const brandingText = settings.branding_text || I18n.t("sorumatik_ai.branding") || "sorumatik.co Yapay Zeka Motoru";
+
+        const showApp = settings.show_app_download !== false;
+        const useDirect = settings.use_direct_store_links === true;
+        const appLandingUrl = settings.app_landing_url || "https://sorumatik.co/t/app";
+        const androidUrl = settings.android_store_url || "https://play.google.com/store/apps/details?id=com.sorumatik";
+        const iosUrl = settings.ios_store_url || "https://apps.apple.com/app/sorumatik/id6474668271";
+
+        if (!showBranding && !showApp) return "";
+
+        let leftHtml = "";
+        if (showBranding) {
+          leftHtml = `
+            <div class="footer-left">
+              <a href="${brandingUrl}" target="_blank" rel="noopener noreferrer" class="branding-link" title="sorumatik.co">
+                <span class="lightning-icon">⚡</span>
+                <span><strong>${brandingText}</strong></span>
+              </a>
+            </div>
+          `;
+        }
+
+        let rightHtml = "";
+        if (showApp) {
+          if (useDirect) {
+            rightHtml = `
+              <div class="footer-right">
+                <span class="app-hint">${I18n.t("sorumatik_ai.download_app_hint") || "Mobilde çözdür & dinle:"}</span>
+                <a href="${androidUrl}" target="_blank" rel="noopener noreferrer" class="app-download-btn android-btn">
+                  ${I18n.t("sorumatik_ai.download_android") || "🤖 Android"}
+                </a>
+                <a href="${iosUrl}" target="_blank" rel="noopener noreferrer" class="app-download-btn ios-btn">
+                  ${I18n.t("sorumatik_ai.download_ios") || "🍎 iOS"}
+                </a>
+              </div>
+            `;
+          } else {
+            rightHtml = `
+              <div class="footer-right">
+                <a href="${appLandingUrl}" target="_blank" rel="noopener noreferrer" class="app-download-btn" title="Sorumatik Mobil Uygulamasını İndir">
+                  ${I18n.t("sorumatik_ai.download_app_button") || "📱 Sorumatik Uygulamasını İndir"}
+                </a>
+              </div>
+            `;
+          }
+        }
+
+        return `
+          <div class="sorumatik-ai-live-footer">
+            ${leftHtml}
+            ${rightHtml}
+          </div>
+        `;
+      }
+
       function ensureCardElement(sourcePostNumber = 1) {
         if (isCardMounted && document.querySelector(".sorumatik-ai-live-card")) {
           return document.querySelector(".sorumatik-ai-live-card");
         }
 
-        // Kartı sorunun hemen altına (Post #1 veya kaynak post) yerleştir
+        // Kartı sorunun hemen altına (Post #1 veya ilgili kaynak post) yerleştir
         const postElement =
           document.querySelector(`#post_${sourcePostNumber}`) ||
           document.querySelector(".topic-post:first-child") ||
@@ -89,6 +145,7 @@ export default {
               <span>${I18n.t("sorumatik_ai.generating") || "Çözüm adımları canlı hazırlanıyor..."}</span>
             </div>
           </div>
+          ${buildFooterHtml()}
         `;
 
         if (postElement.classList.contains("post-stream")) {
@@ -135,7 +192,6 @@ export default {
               } catch (_) {}
             }
           } catch (_) {
-            // Basit metin yedeği
             bodyEl.textContent = currentRaw;
           }
         }, 60);
@@ -176,7 +232,6 @@ export default {
         activeChannel = channel;
         currentSourcePostId = sourcePostId;
 
-        // Kartı ilk durumla oluştur
         ensureCardElement(sourcePostNumber);
 
         // Sunucuda zaten üretilmiş kısım varsa hemen çekip ekrana koy
@@ -208,7 +263,7 @@ export default {
                 } catch (_) {}
               }
             }
-          }, -1); // -1: En son mesajı kaçırmamak için backlog'u da al
+          }, -1);
         }
       }
 

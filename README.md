@@ -1,16 +1,15 @@
-# Sorumatik AI Canlı Cevap — Discourse Tema Bileşeni (Theme Component)
+# Sorumatik AI Canlı Cevap & Mobil Uygulama — Discourse Tema Bileşeni
 
-Sorumatik forumunda web tarayıcısı (masaüstü ve mobil web) üzerinden açılan sorularda **Yapay Zeka (Gemini) çözümlerinin gerçek zamanlı olarak kelime kelime akmasını** sağlayan resmi Discourse tema bileşenidir.
+Sorumatik forumunda web tarayıcısı (masaüstü ve mobil web) üzerinden açılan sorularda **Yapay Zeka (Gemini) çözümlerinin gerçek zamanlı olarak kelime kelime akmasını** ve **Sorumatik mobil uygulamasının tanıtımını** sağlayan resmi Discourse tema bileşenidir.
 
 ---
 
-## 🚀 Nasıl Çalışır?
+## 🚀 Öne Çıkan Özellikler
 
-1. Kullanıcı web üzerinden yeni bir soru konusu açtığında veya takip sorusu sorduğunda, `discourse-sorumatik-ocr` eklentisi soruyu sunucuda (Sidekiq) üretmeye başlar.
-2. Bu tema bileşeni, Discourse'un yerleşik `MessageBus` altyapısı üzerinden `/sorumatik/ai-answer/:source_post_id` kanalına anında bağlanır.
-3. Sorunun hemen altına şık ve modern bir **"Sorumatik AI Çözümü Yazıyor..."** kartı yerleştirir.
-4. Üretilen metin ve KaTeX matematik formülleri canlı olarak akar.
-5. Cevap tamamlandığında canlı kart yumuşakça kaybolur ve kalıcı bot cevabı konudaki yerini alır.
+1. **Canlı Akış (MessageBus):** Kullanıcı webden bir soru açtığında, sunucuda üretilen çözüm adımları daktilo efekti ve KaTeX matematik formülleriyle canlı olarak ekranda akar.
+2. **sorumatik.co Marka İmzası:** Kartın altında şık `⚡ sorumatik.co Yapay Zeka Motoru` etiketiyle platform güvenini pekiştirir.
+3. **Mobil Uygulamaya Dönüşüm Rozeti:** Çözüm kartının altında `📱 Sorumatik Uygulamasını İndir` butonu yer alır. Tıklandığında doğrudan `https://sorumatik.co/t/app` yönlendirme sayfasına veya mağaza linklerine yönlendirir.
+4. **Sorunsuz Geçiş:** Sunucu cevabı tamamlayıp postu Discourse veritabanına kaydettiğinde canlı kart yumuşakça kaybolur ve kalıcı bot cevabı konudaki yerini alır.
 
 ---
 
@@ -36,7 +35,14 @@ Tema bileşeni ayarlarından dilediğiniz gibi özelleştirebilirsiniz:
 - `bot_username`: Cevabı yazan botun kullanıcı adı (Varsayılan: `sorumatik_ai`).
 - `card_title`: Canlı kartın başlığı (Varsayılan: `Sorumatik AI Çözümü Yazıyor...`).
 - `show_pulse_indicator`: Yeşil canlı yayın nabız noktasını göster / gizle (Varsayılan: `true`).
-- `bot_avatar_url`: İsteğe bağlı özel bot avatar görseli linki.
+- `show_branding`: `sorumatik.co` marka etiketini göster / gizle (Varsayılan: `true`).
+- `branding_url`: Marka tıklandığında gidilecek adres (Varsayılan: `https://sorumatik.co`).
+- `branding_text`: Marka metni (Varsayılan: `sorumatik.co Yapay Zeka Motoru`).
+- `show_app_download`: Uygulama indirme butonunu göster / gizle (Varsayılan: `true`).
+- `app_landing_url`: İndirme yönlendirme linki (Varsayılan: `https://sorumatik.co/t/app`).
+- `use_direct_store_links`: Yönlendirme sayfası yerine doğrudan Android & iOS butonlarını ayrı göster (Varsayılan: `false`).
+- `android_store_url`: Google Play Store indirme linki.
+- `ios_store_url`: Apple App Store indirme linki.
 
 ---
 
