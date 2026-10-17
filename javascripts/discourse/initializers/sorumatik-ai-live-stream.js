@@ -540,18 +540,19 @@ export default {
         const postStream = topic.get("postStream");
         const posts = postStream?.get("posts") || [];
 
-        // Botun cevabı zaten konuya kalıcı olarak eklenmişse canlı karta gerek yok
+        const pending = topic.get("sorumatik_pending_generation");
         const hasExistingBotReply = posts.some(
           (p) => (p.get ? p.get("username") : p.username)?.toLowerCase() === botUsername
         );
-        if (hasExistingBotReply) {
+
+        // Eğer aktif bekleyen bir üretim yoksa ve botun cevabı zaten eklenmişse canlı karta gerek yok
+        if (!pending && hasExistingBotReply) {
           cleanupCurrentSession();
           return;
         }
 
-        // İlk post ID'sini güvenilir kaynaklardan al
-        const pending = topic.get("sorumatik_pending_generation");
-        const firstPostId =
+        // Kaynak post ID'sini güvenilir kaynaklardan al
+        const sourcePostId =
           pending?.source_post_id ||
           topic.get("first_post_id") ||
           postStream?.get("firstPostId") ||
@@ -559,14 +560,15 @@ export default {
           postStream?.stream?.[0] ||
           (posts.length > 0 ? (posts[0].get ? posts[0].get("id") : posts[0].id) : null);
 
-        if (!firstPostId) {
+        if (!sourcePostId) {
           if (retries > 0) {
             pageChangeCheckTimer = setTimeout(() => inspectTopicAndAttach(retries - 1), 150);
           }
           return;
         }
 
-        attachToGeneration(topic, firstPostId, 1);
+        const targetPostNumber = pending ? (topic.get("highest_post_number") || posts.length + 1) : 1;
+        attachToGeneration(topic, sourcePostId, targetPostNumber);
       }
 
       api.onPageChange((url) => {
