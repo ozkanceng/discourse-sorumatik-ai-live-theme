@@ -52,8 +52,9 @@ export default apiInitializer("1.8.0", (api) => {
   const autoScrollToAnswer = settings.auto_scroll_to_answer !== false;
   const autoScrollFollow = settings.auto_scroll_follow_stream !== false;
 
-  // sorumatik_ai resmi bot profil avatarı
-  const defaultBotAvatar = `/user_avatar/sorumatik.co/${botUsername}/90/235405_2.png`;
+  // sorumatik_ai resmi bot profil avatarı (alt alan adlarına tam uyumlu)
+  const currentHost = window.location.hostname || "sorumatik.co";
+  const defaultBotAvatar = `/user_avatar/${currentHost}/${botUsername}/90/235405_2.png`;
   const botAvatarUrl = (settings.bot_avatar_url || "").trim() || defaultBotAvatar;
 
   function getMessageBus() {
