@@ -12,3 +12,6 @@ tr:
     download_app_hint: "Mobilde kesintisiz & sesli soru çözümü için"
     download_android: "🤖 Android İndir"
     download_ios: "🍎 iOS İndir"
+    video_solution_watch: "🎬 Video Çözüm Var"
+    video_solution_hint: "Uygulamada ücretsiz izle"
+    video_solution_desktop_hint: "Bu sorunun video çözümü var. Uygulamada ücretsiz izleyebilirsin."

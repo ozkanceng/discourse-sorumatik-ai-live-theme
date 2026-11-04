@@ -12,3 +12,6 @@ en:
     download_app_hint: "Get voice solutions and instant answers on mobile"
     download_android: "🤖 Download for Android"
     download_ios: "🍎 Download for iOS"
+    video_solution_watch: "🎬 Video Solution Available"
+    video_solution_hint: "Watch for free in the app"
+    video_solution_desktop_hint: "This question has a video solution. Watch it for free in the app."
